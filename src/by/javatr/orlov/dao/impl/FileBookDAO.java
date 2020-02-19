@@ -1,7 +1,7 @@
 package by.javatr.orlov.dao.impl;
 
-import by.javatr.orlov.bean.Book;
 import by.javatr.orlov.Parser;
+import by.javatr.orlov.bean.Book;
 import by.javatr.orlov.dao.BookDAO;
 import by.javatr.orlov.dao.exception.DAOException;
 
@@ -11,26 +11,100 @@ import java.util.ArrayList;
 
 public class FileBookDAO implements BookDAO, FilePath {
 
-//    @Override
-//    public ArrayList<Book> deserialize () throws DAOException{
-//        try (FileInputStream fileInputStream = new FileInputStream(BOOK_FILE_PATH);
-//             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-//            return (ArrayList<Book>) objectInputStream.readObject();
-//        } catch (IOException | ClassNotFoundException e) {
-//            throw new DAOException(e);
-//        }
-//
-//    }
+    @Override
+    public void addBook (Book book) throws DAOException{
+        try (BufferedWriter bufferWriter = new BufferedWriter(
+                new FileWriter(BOOK_FILE_PATH_TXT, true))) {
+            bufferWriter.write(parseBookToString(book));
+        } catch (IOException e) {
+            throw new DAOException("DB error", e);
+        }
+    }
 
-//    @Override
-//    public void serialize (ArrayList<Book> array) throws DAOException{
-//        try (FileOutputStream outputStream = new FileOutputStream(BOOK_FILE_PATH);
-//             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream)) {
-//            objectOutputStream.writeObject(array);
-//        } catch (IOException e) {
-//            throw new DAOException(e);
-//        }
-//    }
+    @Override
+    public void removeBook (Book book) throws DAOException{
+        String targetLine = parseBookToString(book);
+        String line = null;
+        StringBuilder stringBuilder = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(
+                new FileReader(
+                        new File(BOOK_FILE_PATH_TXT)))) {
+            while ((line = reader.readLine()) != null) {
+                line += "\n";
+                if (!line.equals(targetLine)) {
+                    stringBuilder.append(line);
+                }
+            }
+        } catch (IOException e) {
+            throw new DAOException("Error in file reading: " + e.getMessage());
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(
+                new FileWriter(
+                        new File(BOOK_FILE_PATH_TXT)))) {
+            writer.write(String.valueOf(stringBuilder));
+        } catch (IOException e) {
+            throw new DAOException("Error in file writing: " + e.getMessage());
+        }
+
+    }
+
+    @Override
+    public Book getBook (String iSBN) throws DAOException{
+        String line = null;
+        try (BufferedReader reader = new BufferedReader(
+                new FileReader(
+                        new File(BOOK_FILE_PATH_TXT)))) {
+            while ((line = reader.readLine()) != null) {
+                if (Parser.parseStr(line, 0).equals(iSBN)) {
+                    return parseBookFromString(line);
+                }
+            }
+        } catch (IOException e) {
+            throw new DAOException("Error in file reading: " + e.getMessage());
+        }
+        throw new DAOException("No such book");
+    }
+
+    @Override
+    public ArrayList<Book> searchBooks (String searchStr) throws DAOException{
+        ArrayList<Book> books = loadBooks();
+        ArrayList<Book> matchedBooks = new ArrayList<>();
+        for (Book b :
+                books) {
+            if (b.getISBN().equalsIgnoreCase(searchStr) ||
+                    b.getTitle().equalsIgnoreCase(searchStr) ||
+                    b.getSubject().equalsIgnoreCase(searchStr) ||
+                    b.getAuthor().equalsIgnoreCase(searchStr)) {
+                matchedBooks.add(b);
+            }
+        }
+        return matchedBooks;
+    }
+
+    @Override
+    public boolean isInLibrary (String iSBN) throws DAOException{
+        ArrayList<Book> books = loadBooks();
+        for (Book book :
+                books) {
+            if (book.getISBN().equals(iSBN))
+                return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void setISBN(String iSBN, String newISBN) throws DAOException{
+        ArrayList<Book> books = loadBooks();
+        for (Book book :
+                books) {
+            if (book.getISBN().equals(iSBN)){
+                book.setISBN(newISBN);
+                break;
+            }
+        }
+        saveBooks(books);
+    }
 
     @Override
     public void saveBooks (ArrayList<Book> books) throws DAOException{
@@ -39,25 +113,37 @@ public class FileBookDAO implements BookDAO, FilePath {
             StringBuilder stringBuilder = new StringBuilder();
             for (Book book :
                     books) {
-                stringBuilder.append("|");
-                stringBuilder.append(book.getISBN());
-                stringBuilder.append("|");
-                stringBuilder.append(book.getTitle());
-                stringBuilder.append("|");
-                stringBuilder.append(book.getSubject());
-                stringBuilder.append("|");
-                stringBuilder.append(book.getAuthor());
-                stringBuilder.append("|");
-                stringBuilder.append(book.isIssued());
-                stringBuilder.append("|\n");
+                stringBuilder.append(parseBookToString(book));
             }
             writer.write(String.valueOf(stringBuilder));
-
         } catch (IOException e) {
             throw new DAOException(e);
         }
     }
 
+    private String parseBookToString (Book book){
+        return "|" +
+                book.getISBN() +
+                "|" +
+                book.getTitle() +
+                "|" +
+                book.getSubject() +
+                "|" +
+                book.getAuthor() +
+                "|" +
+                book.isIssued() +
+                "|\n";
+    }
+
+    private Book parseBookFromString (String bookString){
+        boolean issued = false;
+        issued = Parser.parseStr(bookString, 4).equals("true");
+        return new Book(Parser.parseStr(bookString, 0),
+                Parser.parseStr(bookString, 1),
+                Parser.parseStr(bookString, 2),
+                Parser.parseStr(bookString, 3),
+                issued);
+    }
 
     @Override
     public ArrayList<Book> loadBooks () throws DAOException{
@@ -65,15 +151,9 @@ public class FileBookDAO implements BookDAO, FilePath {
                 new InputStreamReader(
                         new FileInputStream(BOOK_FILE_PATH_TXT), StandardCharsets.UTF_8))) {
             ArrayList<Book> books = new ArrayList<>();
-            String line;
-            boolean issued = false;
-            while ((line = reader.readLine()) != null) {
-                issued = Parser.parseStr(line, 4).equals("true");
-                books.add(new Book(Parser.parseStr(line,0),
-                        Parser.parseStr(line,1),
-                        Parser.parseStr(line,2),
-                        Parser.parseStr(line,3),
-                        issued));
+            String bookString;
+            while ((bookString = reader.readLine()) != null) {
+                books.add(parseBookFromString(bookString));
             }
             return books;
         } catch (IOException e) {

@@ -19,35 +19,22 @@ public class LibraryServiceImpl implements LibraryService {
         booksInLibrary = new ArrayList<>();
     }
 
-    public void addBookInLibrary (Book b) throws ServiceException{
+    private void addBookInLibrary (Book b) throws ServiceException{
         booksInLibrary.add(b);
-        saveBooks();
+        try {
+            DAOFactory.getInstance().getBookDAO().addBook(b);
+        } catch (DAOException e) {
+            throw new ServiceException("Adding book error", e);
+        }
     }
 
     private void removeBook (Book book) throws ServiceException{
         booksInLibrary.remove(book);
-        saveBooks();
-    }
-
-
-    @Override
-    public String searchBooksByFields (String searchStr) throws ServiceException{
-        Checker.validateStringField(searchStr, "Key word");
-
-        ArrayList<Book> matchedBooks = new ArrayList<>();
-
-        for (Book b :
-                booksInLibrary) {
-
-            if (b.getISBN().equalsIgnoreCase(searchStr) ||
-                    b.getTitle().equalsIgnoreCase(searchStr) ||
-                    b.getSubject().equalsIgnoreCase(searchStr) ||
-                    b.getAuthor().equalsIgnoreCase(searchStr))
-                matchedBooks.add(b);
+        try {
+            DAOFactory.getInstance().getBookDAO().removeBook(book);
+        } catch (DAOException e) {
+            throw new ServiceException("Removing book error",e);
         }
-        if (!matchedBooks.isEmpty())
-            return getBookTable(matchedBooks);
-        return "No matches";
     }
 
     private Book getBook (String iSBN) throws ServiceException{
@@ -60,13 +47,26 @@ public class LibraryServiceImpl implements LibraryService {
         throw new ServiceException("No such book in library");
     }
 
-    private boolean isInLibrary (String iSBN){
-        for (Book book :
-                booksInLibrary) {
-            if (book.getISBN().equals(iSBN))
-                return true;
+    @Override
+    public String searchBooksByFields (String searchStr) throws ServiceException{
+        Checker.validateStringField(searchStr, "Key word");
+        ArrayList<Book> matchedBooks = null;
+        try {
+            matchedBooks = DAOFactory.getInstance().getBookDAO().searchBooks(searchStr);
+        } catch (DAOException e) {
+            throw new ServiceException("No such books in library");
         }
-        return false;
+        if (!matchedBooks.isEmpty())
+            return getBookTable(matchedBooks);
+        return "No matches";
+    }
+
+    private boolean isInLibrary (String iSBN) throws ServiceException{
+        try {
+            return DAOFactory.getInstance().getBookDAO().isInLibrary(iSBN);
+        } catch (DAOException e) {
+            throw new ServiceException("library Error",e);
+        }
     }
 
     @Override
@@ -74,8 +74,11 @@ public class LibraryServiceImpl implements LibraryService {
         Checker.validateStringField(newISBN, "New ISBN");
         if (isInLibrary(newISBN))
             throw new ServiceException("Book with this ISBN:" + newISBN + " already is in library");
-        getBook(iSBN).setISBN(newISBN);
-        saveBooks();
+        try {
+            DAOFactory.getInstance().getBookDAO().setISBN(iSBN, newISBN);
+        } catch (DAOException e) {
+            throw new ServiceException("library Error",e);
+        }
     }
 
     @Override
@@ -114,7 +117,14 @@ public class LibraryServiceImpl implements LibraryService {
     @Override
     public void removeBookFromLibrary (String iSBN) throws ServiceException{
         Checker.validateStringField(iSBN, "ISBN");
-        removeBook(getBook(iSBN));
+        try {
+            Book book = DAOFactory.getInstance().getBookDAO().getBook(iSBN);
+            if (book.isIssued())
+                throw new ServiceException("Book is loaned");
+            removeBook(book);
+        } catch (DAOException e) {
+            throw new ServiceException("Error in getting book",e);
+        }
     }
 
     @Override
