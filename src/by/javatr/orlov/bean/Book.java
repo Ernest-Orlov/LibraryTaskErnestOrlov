@@ -29,12 +29,12 @@ public class Book implements Serializable, Cloneable {
     }
 
     public Book (String iSBN, String title, String subject, String author, boolean issued){
-    this(iSBN, title, subject, author);
-    this.setIssued(issued);
+        this(iSBN, title, subject, author);
+        this.setIssued(issued);
     }
 
 
-    public Book(Book book){
+    public Book (Book book){
         this.iSBN = book.getISBN();
         this.title = book.getTitle();
         this.subject = book.getSubject();

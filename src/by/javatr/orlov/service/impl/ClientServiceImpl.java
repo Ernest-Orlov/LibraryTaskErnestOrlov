@@ -6,7 +6,6 @@ import by.javatr.orlov.dao.exception.DAOException;
 import by.javatr.orlov.dao.factory.DAOFactory;
 import by.javatr.orlov.service.ClientService;
 import by.javatr.orlov.service.exception.ServiceException;
-import by.javatr.orlov.service.factory.ServiceFactory;
 
 import java.util.ArrayList;
 
@@ -33,7 +32,6 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public boolean logIn (String login, String password) throws ServiceException{
         loadUsers();
-        ServiceFactory.getInstance().getLibraryService().loadBooks();
         Checker.validateStringField(login, "Login");
         Checker.validateStringField(password, "Password");
 
@@ -173,9 +171,9 @@ public class ClientServiceImpl implements ClientService {
     private String getLoanTable (ArrayList<User> users) throws ServiceException{
         {
             boolean empty = true;
-            for (User user:
-                 users) {
-                if(!user.getBorrowedBooks().isEmpty()){
+            for (User user :
+                    users) {
+                if (!user.getBorrowedBooks().isEmpty()) {
                     empty = false;
                 }
             }

@@ -24,9 +24,6 @@ public interface LibraryService {
 
     void returnBook (String iSBN, User user) throws ServiceException, CloneNotSupportedException;
 
-    String getAllBooks ();
+    String getAllBooks () throws ServiceException;
 
-    void loadBooks () throws ServiceException;
-
-    void saveBooks () throws ServiceException;
 }

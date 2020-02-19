@@ -25,7 +25,7 @@ public class Main {
 //        System.out.println(controller.executeTask("|register_user|name1|login1|password1|"));
 ////
 ////
-//        System.out.println(controller.executeTask("|register_admin|admin|admin|admin|"));
+        System.out.println(controller.executeTask("|register_admin|admin|admin|admin|"));
         System.out.println(controller.executeTask("|log_in|admin|admin|"));
 
 
@@ -47,19 +47,17 @@ public class Main {
         System.out.println(controller.executeTask("|add_book|3333|title|subject|author|"));
 
 
-                System.out.println(controller.executeTask("|edit_author|2222|adawd|"));
+//                System.out.println(controller.executeTask("|edit_author|2222|XXX|"));
 
 
-//                System.out.println(controller.executeTask("|loan_book|2222|"));
+        System.out.println(controller.executeTask("|loan_book|2222|"));
 
-                System.out.println(controller.executeTask("|get_all_books|"));
+//                System.out.println(controller.executeTask("|get_all_books|"));
 
 //                System.out.println(controller.executeTask("|search_books|3333|"));
 
 
-
-
-//        System.out.println(controller.executeTask("|REMOVE_BOOK|2222|"));
+        System.out.println(controller.executeTask("|REMOVE_BOOK|2222|"));
 
 //        System.out.println(controller.executeTask("|get_all_books|"));
 //        System.out.println(controller.executeTask("|log_in|login|password|"));
@@ -85,13 +83,13 @@ public class Main {
 //        System.out.println(controller.executeTask("|log_in|login1|password1|"));
 
 //        System.out.println(controller.executeTask("|return_book|3333|"));
-//
+
 //        System.out.println(controller.executeTask("|return_book|2222|"));
 ////
 //        System.out.println(controller.executeTask("|get_all_books|"));
 //        System.out.println(controller.executeTask("|search_books|subject|"));
 //
-//        System.out.println(controller.executeTask("|get_all_loans|"));
+        System.out.println(controller.executeTask("|get_all_loans|"));
 //        System.out.println(controller.executeTask("|get_user_loans|admin|"));
 
 

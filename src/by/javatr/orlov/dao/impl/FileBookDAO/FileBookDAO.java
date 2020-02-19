@@ -1,9 +1,10 @@
-package by.javatr.orlov.dao.impl;
+package by.javatr.orlov.dao.impl.FileBookDAO;
 
 import by.javatr.orlov.Parser;
 import by.javatr.orlov.bean.Book;
 import by.javatr.orlov.dao.BookDAO;
 import by.javatr.orlov.dao.exception.DAOException;
+import by.javatr.orlov.dao.impl.FilePath;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -94,17 +95,43 @@ public class FileBookDAO implements BookDAO, FilePath {
     }
 
     @Override
-    public void setISBN(String iSBN, String newISBN) throws DAOException{
+    public void setISBN (String iSBN, String newValue) throws DAOException{
+        edit(iSBN, newValue, new EditBookISBN());
+    }
+
+    @Override
+    public void setTitle (String iSBN, String newValue) throws DAOException{
+        edit(iSBN, newValue, new EditBookTitle());
+    }
+
+    @Override
+    public void setSubject (String iSBN, String newValue) throws DAOException{
+        edit(iSBN, newValue, new EditBookSubject());
+    }
+
+    @Override
+    public void setAuthor (String iSBN, String newValue) throws DAOException{
+        edit(iSBN, newValue, new EditBookAuthor());
+    }
+
+    @Override
+    public void setIssued (String iSBN, String newValue) throws DAOException{
+        edit(iSBN, newValue, new EditBookIssued());
+    }
+
+    private void edit (String iSBN, String newValue, EditBook editBook) throws DAOException{
         ArrayList<Book> books = loadBooks();
         for (Book book :
                 books) {
-            if (book.getISBN().equals(iSBN)){
-                book.setISBN(newISBN);
+            if (book.getISBN().equals(iSBN)) {
+                editBook.editBook(book, newValue);
                 break;
             }
         }
         saveBooks(books);
+
     }
+
 
     @Override
     public void saveBooks (ArrayList<Book> books) throws DAOException{

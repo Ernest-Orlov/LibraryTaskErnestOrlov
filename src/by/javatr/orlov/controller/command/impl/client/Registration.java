@@ -1,7 +1,7 @@
 package by.javatr.orlov.controller.command.impl.client;
 
-import by.javatr.orlov.controller.command.Command;
 import by.javatr.orlov.Parser;
+import by.javatr.orlov.controller.command.Command;
 
 public abstract class Registration implements Command {
 

@@ -3,7 +3,6 @@ package by.javatr.orlov.controller;
 import by.javatr.orlov.controller.command.Command;
 import by.javatr.orlov.controller.command.CommandName;
 import by.javatr.orlov.controller.command.impl.client.*;
-import by.javatr.orlov.controller.command.impl.ResetFiles;
 import by.javatr.orlov.controller.command.impl.library.GetAllBooks;
 import by.javatr.orlov.controller.command.impl.library.LoanBook;
 import by.javatr.orlov.controller.command.impl.library.ReturnBook;
@@ -43,7 +42,6 @@ final class CommandProvider {
         repository.put(CommandName.SEARCH_BOOKS, new SearchBooks());
 
         repository.put(CommandName.WRONG_REQUEST, new WrongRequest());
-        repository.put(CommandName.RESET_FILES, new ResetFiles());
     }
 
     Command getCommand (String name){

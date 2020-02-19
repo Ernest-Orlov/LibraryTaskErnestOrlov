@@ -24,7 +24,6 @@ public enum CommandName {
     SEARCH_BOOKS,
     LOAN_BOOK,
     RETURN_BOOK,
-
-    RESET_FILES,
+    
     WRONG_REQUEST
 }

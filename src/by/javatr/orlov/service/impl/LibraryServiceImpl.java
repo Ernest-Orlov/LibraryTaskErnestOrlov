@@ -13,14 +13,11 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class LibraryServiceImpl implements LibraryService {
-    private ArrayList<Book> booksInLibrary;
 
     public LibraryServiceImpl (){
-        booksInLibrary = new ArrayList<>();
     }
 
     private void addBookInLibrary (Book b) throws ServiceException{
-        booksInLibrary.add(b);
         try {
             DAOFactory.getInstance().getBookDAO().addBook(b);
         } catch (DAOException e) {
@@ -29,22 +26,11 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     private void removeBook (Book book) throws ServiceException{
-        booksInLibrary.remove(book);
         try {
             DAOFactory.getInstance().getBookDAO().removeBook(book);
         } catch (DAOException e) {
-            throw new ServiceException("Removing book error",e);
+            throw new ServiceException("Removing book error", e);
         }
-    }
-
-    private Book getBook (String iSBN) throws ServiceException{
-        Checker.validateStringField(iSBN, "ISBN");
-        for (Book book :
-                booksInLibrary) {
-            if (book.getISBN().equals(iSBN))
-                return book;
-        }
-        throw new ServiceException("No such book in library");
     }
 
     @Override
@@ -65,7 +51,7 @@ public class LibraryServiceImpl implements LibraryService {
         try {
             return DAOFactory.getInstance().getBookDAO().isInLibrary(iSBN);
         } catch (DAOException e) {
-            throw new ServiceException("library Error",e);
+            throw new ServiceException("library Error", e);
         }
     }
 
@@ -77,29 +63,38 @@ public class LibraryServiceImpl implements LibraryService {
         try {
             DAOFactory.getInstance().getBookDAO().setISBN(iSBN, newISBN);
         } catch (DAOException e) {
-            throw new ServiceException("library Error",e);
+            throw new ServiceException("library Error", e);
         }
     }
 
     @Override
     public void setTitle (String iSBN, String newTitle) throws ServiceException{
         Checker.validateStringField(newTitle, "New title");
-        getBook(iSBN).setTitle(newTitle);
-        saveBooks();
+        try {
+            DAOFactory.getInstance().getBookDAO().setTitle(iSBN, newTitle);
+        } catch (DAOException e) {
+            throw new ServiceException("library Error", e);
+        }
     }
 
     @Override
     public void setSubject (String iSBN, String newSubject) throws ServiceException{
         Checker.validateStringField(newSubject, "New subject");
-        getBook(iSBN).setSubject(newSubject);
-        saveBooks();
+        try {
+            DAOFactory.getInstance().getBookDAO().setSubject(iSBN, newSubject);
+        } catch (DAOException e) {
+            throw new ServiceException("library Error", e);
+        }
     }
 
     @Override
     public void setAuthor (String iSBN, String newAuthor) throws ServiceException{
         Checker.validateStringField(newAuthor, "New author");
-        getBook(iSBN).setAuthor(newAuthor);
-        saveBooks();
+        try {
+            DAOFactory.getInstance().getBookDAO().setAuthor(iSBN, newAuthor);
+        } catch (DAOException e) {
+            throw new ServiceException("library Error", e);
+        }
     }
 
     @Override
@@ -123,7 +118,7 @@ public class LibraryServiceImpl implements LibraryService {
                 throw new ServiceException("Book is loaned");
             removeBook(book);
         } catch (DAOException e) {
-            throw new ServiceException("Error in getting book",e);
+            throw new ServiceException("Error in getting book", e);
         }
     }
 
@@ -133,14 +128,20 @@ public class LibraryServiceImpl implements LibraryService {
             throw new ServiceException("No logged user");
         Checker.validateStringField(iSBN, "ISBN");
 
-        Book book = getBook(iSBN);
-        if (book.isIssued())
-            throw new ServiceException("Book is already issued");
-        book.setIssued(true);
-        Loan ln = new Loan(iSBN, new Date());
-        user.addLoan(ln);
-        saveBooks();
-        ServiceFactory.getInstance().getClientService().saveUsers();
+        Book book = null;
+        try {
+            book = DAOFactory.getInstance().getBookDAO().getBook(iSBN);
+            if (book.isIssued())
+                throw new ServiceException("Book is already issued");
+
+            book.setIssued(true);
+            DAOFactory.getInstance().getBookDAO().setIssued(iSBN, "" + true);
+            Loan ln = new Loan(iSBN, new Date());
+            user.addLoan(ln);
+            ServiceFactory.getInstance().getClientService().saveUsers();
+        } catch (DAOException e) {
+            throw new ServiceException("Library Error", e);
+        }
     }
 
 
@@ -149,25 +150,33 @@ public class LibraryServiceImpl implements LibraryService {
         if (user == null)
             throw new ServiceException("No logged user");
         Checker.validateStringField(iSBN, "ISBN");
+        Book book = null;
+        try {
+            book = DAOFactory.getInstance().getBookDAO().getBook(iSBN);
 
-        Book book = getBook(iSBN);
-        ArrayList<Loan> list = user.getBorrowedBooks();
-        for (Loan l :
-                list) {
-            if (l.getBookISBN().equals(book.getISBN())) {
-                user.removeLoan(l);
-                book.setIssued(false);
-                saveBooks();
-                ServiceFactory.getInstance().getClientService().saveUsers();
-                return;
+            ArrayList<Loan> list = user.getBorrowedBooks();
+            for (Loan l :
+                    list) {
+                if (l.getBookISBN().equals(book.getISBN())) {
+                    user.removeLoan(l);
+                    DAOFactory.getInstance().getBookDAO().setIssued(iSBN, "" + false);
+                    ServiceFactory.getInstance().getClientService().saveUsers();
+                    return;
+                }
             }
+        } catch (DAOException e) {
+            throw new ServiceException("Library Error", e);
         }
         throw new ServiceException("This book is not loaned by you");
     }
 
     @Override
-    public String getAllBooks (){
-        return getBookTable(booksInLibrary);
+    public String getAllBooks () throws ServiceException{
+        try {
+            return getBookTable(DAOFactory.getInstance().getBookDAO().loadBooks());
+        } catch (DAOException e) {
+            throw new ServiceException("Library Error");
+        }
     }
 
     private String getBookTable (ArrayList<Book> books){
@@ -218,24 +227,6 @@ public class LibraryServiceImpl implements LibraryService {
             delimiter.append(ch);
         }
         return String.valueOf(delimiter);
-    }
-
-    @Override
-    public void loadBooks () throws ServiceException{
-        try {
-            booksInLibrary = DAOFactory.getInstance().getBookDAO().loadBooks();
-        } catch (DAOException e) {
-            throw new ServiceException("Library is unavailable", e);
-        }
-    }
-
-    @Override
-    public void saveBooks () throws ServiceException{
-        try {
-            DAOFactory.getInstance().getBookDAO().saveBooks(booksInLibrary);
-        } catch (DAOException e) {
-            throw new ServiceException("Error", e);
-        }
     }
 
 }

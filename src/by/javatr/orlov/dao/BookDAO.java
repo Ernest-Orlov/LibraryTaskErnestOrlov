@@ -20,6 +20,14 @@ public interface BookDAO {
 
     void setISBN (String iSBN, String newISBN) throws DAOException;
 
+    void setTitle (String iSBN, String newValue) throws DAOException;
+
+    void setSubject (String iSBN, String newValue) throws DAOException;
+
+    void setAuthor (String iSBN, String newValue) throws DAOException;
+
+    void setIssued (String iSBN, String newValue) throws DAOException;
+
     void saveBooks (ArrayList<Book> array) throws DAOException;
 
 
