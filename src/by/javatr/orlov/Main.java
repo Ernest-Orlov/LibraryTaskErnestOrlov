@@ -50,7 +50,7 @@ public class Main {
 //                System.out.println(controller.executeTask("|edit_author|2222|XXX|"));
 
 
-        System.out.println(controller.executeTask("|loan_book|2222|"));
+//        System.out.println(controller.executeTask("|loan_book|2222|"));
 
 //                System.out.println(controller.executeTask("|get_all_books|"));
 
@@ -86,7 +86,7 @@ public class Main {
 
 //        System.out.println(controller.executeTask("|return_book|2222|"));
 ////
-//        System.out.println(controller.executeTask("|get_all_books|"));
+        System.out.println(controller.executeTask("|get_all_books|"));
 //        System.out.println(controller.executeTask("|search_books|subject|"));
 //
         System.out.println(controller.executeTask("|get_all_loans|"));

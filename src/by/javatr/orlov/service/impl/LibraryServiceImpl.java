@@ -25,11 +25,16 @@ public class LibraryServiceImpl implements LibraryService {
         }
     }
 
-    private void removeBook (Book book) throws ServiceException{
+    @Override
+    public void removeBookFromLibrary (String iSBN) throws ServiceException{
+        Checker.validateStringField(iSBN, "ISBN");
         try {
+            Book book = DAOFactory.getInstance().getBookDAO().getBook(iSBN);
+            if (book.isIssued())
+                throw new ServiceException("Book is loaned");
             DAOFactory.getInstance().getBookDAO().removeBook(book);
         } catch (DAOException e) {
-            throw new ServiceException("Removing book error", e);
+            throw new ServiceException("Error in removing book", e);
         }
     }
 
@@ -110,19 +115,6 @@ public class LibraryServiceImpl implements LibraryService {
     }
 
     @Override
-    public void removeBookFromLibrary (String iSBN) throws ServiceException{
-        Checker.validateStringField(iSBN, "ISBN");
-        try {
-            Book book = DAOFactory.getInstance().getBookDAO().getBook(iSBN);
-            if (book.isIssued())
-                throw new ServiceException("Book is loaned");
-            removeBook(book);
-        } catch (DAOException e) {
-            throw new ServiceException("Error in getting book", e);
-        }
-    }
-
-    @Override
     public void loanBook (String iSBN, User user) throws ServiceException{
         if (user == null)
             throw new ServiceException("No logged user");
@@ -175,12 +167,12 @@ public class LibraryServiceImpl implements LibraryService {
         try {
             return getBookTable(DAOFactory.getInstance().getBookDAO().loadBooks());
         } catch (DAOException e) {
-            throw new ServiceException("Library Error");
+            throw new ServiceException("Library Error", e);
         }
     }
 
     private String getBookTable (ArrayList<Book> books){
-        {
+        { //todo refactor
             if (books.isEmpty())
                 return "Library is empty!";
             int isbnMax = 6;

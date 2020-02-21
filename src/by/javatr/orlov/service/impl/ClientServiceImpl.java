@@ -169,7 +169,7 @@ public class ClientServiceImpl implements ClientService {
 
     //todo сделать нормальную таблицу
     private String getLoanTable (ArrayList<User> users) throws ServiceException{
-        {
+        { //todo refactor
             boolean empty = true;
             for (User user :
                     users) {
