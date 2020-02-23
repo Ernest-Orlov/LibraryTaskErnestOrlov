@@ -7,10 +7,29 @@ import by.javatr.orlov.dao.exception.DAOException;
 import by.javatr.orlov.dao.impl.FilePath;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 
 public class FileBookDAO implements BookDAO, FilePath {
+
+    private void writeInFile (String string) throws DAOException{
+        try (BufferedWriter bufferedWriter = new BufferedWriter(
+                new FileWriter(
+                        new File(BOOK_FILE_PATH_TXT)))) {
+            bufferedWriter.write(string);
+        } catch (IOException e) {
+            throw new DAOException("Error in file writing", e);
+        }
+    }
+
+    public String readFromFile (BookReader bookReader, String param) throws DAOException{
+        try (BufferedReader bufferedReader = new BufferedReader(
+                new FileReader(
+                        new File(BOOK_FILE_PATH_TXT)))) {
+            return bookReader.read(bufferedReader, param);
+        } catch (IOException e) {
+            throw new DAOException("Error in reading from file:", e);
+        }
+    }
 
     @Override
     public void addBook (Book book) throws DAOException{
@@ -24,46 +43,34 @@ public class FileBookDAO implements BookDAO, FilePath {
 
     @Override
     public void removeBook (Book book) throws DAOException{
-        String targetLine = parseBookToString(book);
-        String line = null;
-        StringBuilder stringBuilder = new StringBuilder();
-        try (BufferedReader reader = new BufferedReader(
-                new FileReader(
-                        new File(BOOK_FILE_PATH_TXT)))) {
-            while ((line = reader.readLine()) != null) {
-                line += "\n";
-                if (!line.equals(targetLine)) {
-                    stringBuilder.append(line);
-                }
-            }
-        } catch (IOException e) {
-            throw new DAOException("Error in file reading", e);
-        }
-        try (BufferedWriter writer = new BufferedWriter(
-                new FileWriter(
-                        new File(BOOK_FILE_PATH_TXT)))) {
-            writer.write(String.valueOf(stringBuilder));
-        } catch (IOException e) {
-            throw new DAOException("Error in file writing", e);
-        }
-
+        writeInFile(readFromFile(new RemoveBook(), parseBookToString(book)));
     }
 
     @Override
     public Book getBook (String iSBN) throws DAOException{
-        String line = null;
-        try (BufferedReader reader = new BufferedReader(
-                new FileReader(
-                        new File(BOOK_FILE_PATH_TXT)))) {
-            while ((line = reader.readLine()) != null) {
-                if (Parser.parseStr(line, 0).equals(iSBN)) {
-                    return parseBookFromString(line);
-                }
-            }
-        } catch (IOException e) {
-            throw new DAOException("Error in file reading:", e);
+        return parseBookFromString(readFromFile(new GetBook(), iSBN));
+    }
+
+    @Override
+    public ArrayList<Book> loadBooks () throws DAOException{
+        String[] mas = Parser.parseStr(readFromFile(new GetAllBooks(),null),'*');
+        ArrayList<Book> books = new ArrayList<>();
+        for (String str :
+                mas) {
+            books.add(parseBookFromString(str));
         }
-        throw new DAOException("No such book");
+        return books;
+    }
+
+
+    @Override
+    public void saveBooks (ArrayList<Book> books) throws DAOException{
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Book book :
+                books) {
+            stringBuilder.append(parseBookToString(book));
+        }
+        writeInFile(String.valueOf(stringBuilder));
     }
 
     @Override
@@ -118,12 +125,12 @@ public class FileBookDAO implements BookDAO, FilePath {
         edit(iSBN, newValue, new EditBookIssued());
     }
 
-    private void edit (String iSBN, String newValue, BookEditor editBook) throws DAOException{
+    private void edit (String iSBN, String newValue, BookEditor bookEditor) throws DAOException{
         ArrayList<Book> books = loadBooks();
         for (Book book :
                 books) {
             if (book.getISBN().equals(iSBN)) {
-                editBook.editBook(book, newValue);
+                bookEditor.editBook(book, newValue);
                 break;
             }
         }
@@ -155,34 +162,4 @@ public class FileBookDAO implements BookDAO, FilePath {
                 issued);
     }
 
-    @Override
-    public void saveBooks (ArrayList<Book> books) throws DAOException{
-        File file = new File(BOOK_FILE_PATH_TXT);
-        try (FileWriter writer = new FileWriter(file)) {
-            StringBuilder stringBuilder = new StringBuilder();
-            for (Book book :
-                    books) {
-                stringBuilder.append(parseBookToString(book));
-            }
-            writer.write(String.valueOf(stringBuilder));
-        } catch (IOException e) {
-            throw new DAOException(e);
-        }
-    }
-
-    @Override
-    public ArrayList<Book> loadBooks () throws DAOException{
-        try (BufferedReader reader = new BufferedReader(
-                new InputStreamReader(
-                        new FileInputStream(BOOK_FILE_PATH_TXT), StandardCharsets.UTF_8))) {
-            ArrayList<Book> books = new ArrayList<>();
-            String bookString;
-            while ((bookString = reader.readLine()) != null) {
-                books.add(parseBookFromString(bookString));
-            }
-            return books;
-        } catch (IOException e) {
-            throw new DAOException(e);
-        }
-    }
 }

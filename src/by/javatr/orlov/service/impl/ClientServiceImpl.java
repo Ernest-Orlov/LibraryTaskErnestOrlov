@@ -167,7 +167,6 @@ public class ClientServiceImpl implements ClientService {
         return String.valueOf(res);
     }
 
-    //todo сделать нормальную таблицу
     private String getLoanTable (ArrayList<User> users) throws ServiceException{
         { //todo refactor
             boolean empty = true;

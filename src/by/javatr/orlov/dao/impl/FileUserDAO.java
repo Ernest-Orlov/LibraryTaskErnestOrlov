@@ -16,26 +16,6 @@ import java.util.Locale;
 
 public class FileUserDAO implements UserDAO, FilePath {
 
-//    @Override
-//    public ArrayList<User> deserialize () throws DAOException{
-//        try (FileInputStream fileInputStream = new FileInputStream(USER_FILE_PATH);
-//             ObjectInputStream objectInputStream = new ObjectInputStream(fileInputStream)) {
-//            return (ArrayList<User>) objectInputStream.readObject();
-//        } catch (IOException | ClassNotFoundException e) {
-//            throw new DAOException(e);
-//        }
-//    }
-
-//    @Override
-//    public void serialize (ArrayList<User> array) throws DAOException{
-//        try (FileOutputStream outputStream = new FileOutputStream(USER_FILE_PATH);
-//             ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream)) {
-//            objectOutputStream.writeObject(array);
-//        } catch (IOException e) {
-//            throw new DAOException(e);
-//        }
-//    }
-
     @Override
     public void serialize (ArrayList<User> users) throws DAOException{
         File file = new File(USER_FILE_PATH_TXT);
