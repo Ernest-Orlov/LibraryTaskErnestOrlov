@@ -17,7 +17,7 @@ public class GetAllLoans implements Command, AdminCheck {
             }
             return clientService.getAllLoans();
         } catch (ServiceException e) {
-            return e.getMessage();
+            return e.getMessage();// никогда так не делай
         }
     }
 }
