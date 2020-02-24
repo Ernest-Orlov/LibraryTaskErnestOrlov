@@ -11,7 +11,8 @@ import java.util.ArrayList;
 
 public class ClientServiceImpl implements ClientService {
 
-    private User currentUser;
+    private User currentUser;// не нужны логике изменяемые несинхронизированные поля экземпляра класса
+    
 
     public ClientServiceImpl (){
     }
@@ -30,7 +31,7 @@ public class ClientServiceImpl implements ClientService {
     @Override
     public boolean logIn (String login, String password) throws ServiceException{
         Checker.validateStringField(login, "Login");
-        Checker.validateStringField(password, "Password");
+        Checker.validateStringField(password, "Password");// как предложение - продумать, как это реализовать с помощью паттерна Цепочка обязанностей
         for (User user :
                 loadUsersFromDb()) {
             if (user.getLogin().equals(login) && user.getPassword().equals(Hasher.getInstance().getHashedPassword(password))) {
