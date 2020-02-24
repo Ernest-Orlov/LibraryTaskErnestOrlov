@@ -47,7 +47,7 @@ public class FileUserDAO implements UserDAO, FilePath {
                 Parser.parseStr(line, 1),
                 Parser.parseStr(line, 2),
                 Parser.parseStr(line, 3).equals("true"));
-        for (int i = 5; i < Integer.parseInt(Parser.parseStr(line, 4)) * 2 + 5; i += 2) {
+        for (int i = 5; i < Integer.parseInt(Parser.parseStr(line, 4)) * 2 + 5; i += 2) {// перебор с количеством циферок
             SimpleDateFormat format1 = new SimpleDateFormat("E MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
             Date date = null;
             try {
