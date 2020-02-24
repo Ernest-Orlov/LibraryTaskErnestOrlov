@@ -2,7 +2,7 @@ package by.javatr.orlov.dao.factory;
 
 import by.javatr.orlov.dao.BookDAO;
 import by.javatr.orlov.dao.UserDAO;
-import by.javatr.orlov.dao.impl.FileBookDAO.FileBookDAO;
+import by.javatr.orlov.dao.impl.book.FileBookDAO;
 import by.javatr.orlov.dao.impl.FileUserDAO;
 
 public final class DAOFactory {

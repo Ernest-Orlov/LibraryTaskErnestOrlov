@@ -18,7 +18,7 @@ public class LoanBook implements Command {
         ClientService clientService = ServiceFactory.getInstance().getClientService();
 
         try {
-            libraryService.loanBook(iSBN, clientService.getCurrentUser());
+            libraryService.loanBook(iSBN);
             response = "Book is loaned";
         } catch (ServiceException e) {
             response = e.getMessage();

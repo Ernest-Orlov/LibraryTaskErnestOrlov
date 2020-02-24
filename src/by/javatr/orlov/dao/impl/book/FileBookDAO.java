@@ -1,4 +1,4 @@
-package by.javatr.orlov.dao.impl.FileBookDAO;
+package by.javatr.orlov.dao.impl.book;
 
 import by.javatr.orlov.Parser;
 import by.javatr.orlov.bean.Book;
@@ -21,7 +21,7 @@ public class FileBookDAO implements BookDAO, FilePath {
         }
     }
 
-    public String readFromFile (BookReader bookReader, String param) throws DAOException{
+    private String readFromFile (BookReader bookReader, String param) throws DAOException{
         try (BufferedReader bufferedReader = new BufferedReader(
                 new FileReader(
                         new File(BOOK_FILE_PATH_TXT)))) {
@@ -52,7 +52,7 @@ public class FileBookDAO implements BookDAO, FilePath {
     }
 
     @Override
-    public ArrayList<Book> loadBooks () throws DAOException{
+    public ArrayList<Book> loadAllBooks () throws DAOException{
         String[] mas = Parser.parseStr(readFromFile(new GetAllBooks(),null),'*');
         ArrayList<Book> books = new ArrayList<>();
         for (String str :
@@ -64,7 +64,7 @@ public class FileBookDAO implements BookDAO, FilePath {
 
 
     @Override
-    public void saveBooks (ArrayList<Book> books) throws DAOException{
+    public void saveAllBooks (ArrayList<Book> books) throws DAOException{
         StringBuilder stringBuilder = new StringBuilder();
         for (Book book :
                 books) {
@@ -75,7 +75,7 @@ public class FileBookDAO implements BookDAO, FilePath {
 
     @Override
     public ArrayList<Book> searchBooks (String searchStr) throws DAOException{
-        ArrayList<Book> books = loadBooks();
+        ArrayList<Book> books = loadAllBooks();
         ArrayList<Book> matchedBooks = new ArrayList<>();
         for (Book b :
                 books) {
@@ -91,7 +91,7 @@ public class FileBookDAO implements BookDAO, FilePath {
 
     @Override
     public boolean isInLibrary (String iSBN) throws DAOException{
-        ArrayList<Book> books = loadBooks();
+        ArrayList<Book> books = loadAllBooks();
         for (Book book :
                 books) {
             if (book.getISBN().equals(iSBN))
@@ -126,7 +126,7 @@ public class FileBookDAO implements BookDAO, FilePath {
     }
 
     private void edit (String iSBN, String newValue, BookEditor bookEditor) throws DAOException{
-        ArrayList<Book> books = loadBooks();
+        ArrayList<Book> books = loadAllBooks();
         for (Book book :
                 books) {
             if (book.getISBN().equals(iSBN)) {
@@ -134,7 +134,7 @@ public class FileBookDAO implements BookDAO, FilePath {
                 break;
             }
         }
-        saveBooks(books);
+        saveAllBooks(books);
 
     }
 

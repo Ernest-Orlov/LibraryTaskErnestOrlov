@@ -25,8 +25,8 @@ public class Main {
 //        System.out.println(controller.executeTask("|register_user|name1|login1|password1|"));
 ////
 ////
-        System.out.println(controller.executeTask("|register_admin|admin|admin|admin|"));
-        System.out.println(controller.executeTask("|log_in|admin|admin|"));
+//        System.out.println(controller.executeTask("|register_admin|admin|admin|admin|"));
+//        System.out.println(controller.executeTask("|log_in|admin|admin|"));
 
 
 //        System.out.println(controller.executeTask("|edit_name|ErikErikErikErikErik|"));
@@ -34,19 +34,20 @@ public class Main {
 
 //                System.out.println(controller.executeTask("|get_all_users|"));
 
+        System.out.println(controller.executeTask("|log_in|login|password|"));
 
 //
 //        System.out.println(controller.executeTask("|log_in|Alarik|1234|"));
 ////
-//        System.out.println(controller.executeTask("|edit_name|Erik|"));
-//        System.out.println(controller.executeTask("|edit_login|Alarik|"));
-//        System.out.println(controller.executeTask("|edit_password|1234|"));
+        System.out.println(controller.executeTask("|edit_name|Erik|"));
+        System.out.println(controller.executeTask("|edit_login|Alarik|"));
+        System.out.println(controller.executeTask("|edit_password|1234|"));
 
-        System.out.println(controller.executeTask("|add_book|1|title|subject|author|"));
-        System.out.println(controller.executeTask("|add_book|2222|title|subject|author|"));
-        System.out.println(controller.executeTask("|add_book|3333|title|subject|author|"));
-        System.out.println(controller.executeTask("|add_book|4444|title|subject|author|"));
-        System.out.println(controller.executeTask("|add_book|5555|title|subject|author|"));
+//        System.out.println(controller.executeTask("|add_book|1|title|subject|author|"));
+//        System.out.println(controller.executeTask("|add_book|2222|title|subject|author|"));
+//        System.out.println(controller.executeTask("|add_book|3333|title|subject|author|"));
+//        System.out.println(controller.executeTask("|add_book|4444|title|subject|author|"));
+//        System.out.println(controller.executeTask("|add_book|5555|title|subject|author|"));
 
 
 //                System.out.println(controller.executeTask("|edit_author|2222|XXX|"));
@@ -59,7 +60,7 @@ public class Main {
 //                System.out.println(controller.executeTask("|search_books|3333|"));
 
 
-        System.out.println(controller.executeTask("|REMOVE_BOOK|1|"));
+//        System.out.println(controller.executeTask("|REMOVE_BOOK|1|"));
 
 //        System.out.println(controller.executeTask("|get_all_books|"));
 //        System.out.println(controller.executeTask("|log_in|login|password|"));
@@ -69,26 +70,26 @@ public class Main {
 //        System.out.println(controller.executeTask("|log_in|Alarik|1234|"));
 //
 //
-        System.out.println(controller.executeTask("|edit_author|2222|adawd|"));
+//        System.out.println(controller.executeTask("|edit_author|2222|adawd|"));
 //        System.out.println(controller.executeTask("|edit_isbn|2222|new isbn|"));
-        System.out.println(controller.executeTask("|edit_subject|3333|new subj|"));
+//        System.out.println(controller.executeTask("|edit_subject|3333|new subj|"));
 //        System.out.println(controller.executeTask("|edit_title|1111|new title|"));
 //
 //
 
-        System.out.println(controller.executeTask("|loan_book|2222|"));
+
 //
-        System.out.println(controller.executeTask("|get_loans|"));
+//        System.out.println(controller.executeTask("|get_loans|"));
 
 
 //        System.out.println(controller.executeTask("|log_out|"));
 //        System.out.println(controller.executeTask("|log_in|login1|password1|"));
 
-        System.out.println(controller.executeTask("|return_book|3333|"));
-
-        System.out.println(controller.executeTask("|return_book|2222|"));
+//        System.out.println(controller.executeTask("|return_book|3333|"));
+//
+//        System.out.println(controller.executeTask("|return_book|2222|"));
 ////
-        System.out.println(controller.executeTask("|get_all_books|"));
+//        System.out.println(controller.executeTask("|get_all_books|"));
 //        System.out.println(controller.executeTask("|search_books|subject|"));
 //
 //        System.out.println(controller.executeTask("|get_all_loans|"));

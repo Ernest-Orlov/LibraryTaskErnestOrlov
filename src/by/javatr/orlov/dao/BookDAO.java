@@ -6,7 +6,7 @@ import by.javatr.orlov.dao.exception.DAOException;
 import java.util.ArrayList;
 
 public interface BookDAO {
-    ArrayList<Book> loadBooks () throws DAOException;
+    ArrayList<Book> loadAllBooks () throws DAOException;
 
     void addBook (Book book) throws DAOException;
 
@@ -28,7 +28,7 @@ public interface BookDAO {
 
     void setIssued (String iSBN, String newValue) throws DAOException;
 
-    void saveBooks (ArrayList<Book> array) throws DAOException;
+    void saveAllBooks (ArrayList<Book> array) throws DAOException;
 
 
 }

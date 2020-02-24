@@ -1,4 +1,4 @@
-package by.javatr.orlov.dao.impl.FileBookDAO;
+package by.javatr.orlov.dao.impl.book;
 
 import by.javatr.orlov.bean.Book;
 

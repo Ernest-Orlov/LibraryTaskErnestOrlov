@@ -1,5 +1,6 @@
 package by.javatr.orlov.service;
 
+import by.javatr.orlov.bean.Loan;
 import by.javatr.orlov.bean.User;
 import by.javatr.orlov.service.exception.ServiceException;
 
@@ -22,6 +23,10 @@ public interface ClientService {
 
     void registerAdmin (String name, String login, String password) throws ServiceException;
 
+    void addLoan(Loan loan) throws ServiceException;
+
+    void removeLoan (Loan loan) throws ServiceException;
+
     String getAllLoans () throws ServiceException;
 
     String getAllUserLoans (String login) throws ServiceException;
@@ -30,7 +35,4 @@ public interface ClientService {
 
     String getAllUsers () throws ServiceException;
 
-    void saveUsers () throws ServiceException;
-
-    void loadUsers () throws ServiceException;
 }

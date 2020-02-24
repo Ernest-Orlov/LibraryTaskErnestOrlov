@@ -1,18 +1,20 @@
-package by.javatr.orlov.dao.impl.FileBookDAO;
+package by.javatr.orlov.dao.impl.book;
 
 import by.javatr.orlov.dao.exception.DAOException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 
-public class GetAllBooks implements BookReader {
+public class RemoveBook implements BookReader {
     @Override
     public String read (BufferedReader bufferedReader, String param) throws IOException, DAOException{
-        String bookString;
+        String line = null;
         StringBuilder stringBuilder = new StringBuilder();
-        stringBuilder.append('*');
-        while ((bookString = bufferedReader.readLine()) != null) {
-            stringBuilder.append(bookString).append('*');
+        while ((line = bufferedReader.readLine()) != null) {
+            line += "\n";
+            if (!line.equals(param)) {
+                stringBuilder.append(line);
+            }
         }
         return String.valueOf(stringBuilder);
     }

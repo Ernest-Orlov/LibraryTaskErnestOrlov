@@ -20,7 +20,7 @@ public interface LibraryService {
 
     void addNewBook (String iSBN, String title, String subject, String author) throws ServiceException;
 
-    void loanBook (String iSBN, User user) throws ServiceException;
+    void loanBook (String iSBN) throws ServiceException;
 
     void returnBook (String iSBN, User user) throws ServiceException, CloneNotSupportedException;
 

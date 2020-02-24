@@ -11,11 +11,9 @@ import java.util.ArrayList;
 
 public class ClientServiceImpl implements ClientService {
 
-    private ArrayList<User> users;
     private User currentUser;
 
     public ClientServiceImpl (){
-        users = new ArrayList<>();
     }
 
     private void checkLoggedIn () throws ServiceException{
@@ -31,12 +29,10 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public boolean logIn (String login, String password) throws ServiceException{
-        loadUsers();
         Checker.validateStringField(login, "Login");
         Checker.validateStringField(password, "Password");
-
         for (User user :
-                users) {
+                loadUsersFromDb()) {
             if (user.getLogin().equals(login) && user.getPassword().equals(Hasher.getInstance().getHashedPassword(password))) {
                 currentUser = user;
                 return true;
@@ -51,70 +47,120 @@ public class ClientServiceImpl implements ClientService {
     }
 
     private void addUser (User user) throws ServiceException{
-        users.add(user);
-        saveUsers();
+        try {
+            DAOFactory.getInstance().getUserDAO().addUser(user);
+        } catch (DAOException e) {
+            throw new ServiceException("Error in adding user", e);
+        }
     }
 
     @Override
     public void setName (String name) throws ServiceException{
         checkLoggedIn();
         Checker.validateStringField(name, "Name");
-        currentUser.setName(name);
-        saveUsers();
+        ArrayList<User> userArrayList = loadUsersFromDb();
+        for (User user :
+                userArrayList) {
+            if (user.equals(currentUser)) {
+                user.setName(name);
+                currentUser.setName(name);
+            }
+        }
+        saveUsersToDB(userArrayList);
     }
 
     @Override
     public void setLogin (String login) throws ServiceException{
         checkLoggedIn();
         Checker.validateStringField(login, "Login");
+        ArrayList<User> userArrayList = loadUsersFromDb();
         for (User user :
-                users) {
+                userArrayList) {
             if (user.getLogin().equals(login))
                 throw new ServiceException("User with this login already exists");
         }
-        currentUser.setLogin(login);
-        saveUsers();
+        for (User user :
+                userArrayList) {
+            if (user.equals(currentUser)) {
+                user.setLogin(login);
+                currentUser.setLogin(login);
+            }
+        }
+        saveUsersToDB(userArrayList);
     }
 
     @Override
     public void setPassword (String password) throws ServiceException{
         checkLoggedIn();
         Checker.validateStringField(password, "Password");
-        currentUser.setPassword(Hasher.getInstance().getHashedPassword(password));
-        saveUsers();
+        ArrayList<User> userArrayList = loadUsersFromDb();
+        for (User user :
+                userArrayList) {
+            if (user.equals(currentUser)) {
+                user.setPassword(Hasher.getInstance().getHashedPassword(password));
+                currentUser.setPassword(Hasher.getInstance().getHashedPassword(password));
+            }
+        }
+        saveUsersToDB(userArrayList);
     }
 
-    @Override
-    public void registerUser (String name, String login, String password) throws ServiceException{
-        loadUsers();
+    private User registration (String name, String login, String password) throws ServiceException{
         Checker.validateStringField(name, "Name");
         Checker.validateStringField(login, "Login");
         Checker.validateStringField(password, "Password");
 
+        ArrayList<User> userArrayList = loadUsersFromDb();
         for (User user :
-                users) {
+                userArrayList) {
             if (user.getLogin().equals(login))
                 throw new ServiceException("User with this login already exists");
         }
-
         User newUser = new User();
         newUser.setName(name);
         newUser.setLogin(login);
         newUser.setPassword(Hasher.getInstance().getHashedPassword(password));
-        addUser(newUser);
+        return newUser;
+    }
+
+    @Override
+    public void registerUser (String name, String login, String password) throws ServiceException{
+        addUser(registration(name, login, password));
     }
 
     @Override
     public void registerAdmin (String name, String login, String password) throws ServiceException{
-        registerUser(name, login, password);
-        users.get(users.size() - 1).setAdmin(true);
-        saveUsers();
+        User user = registration(name, login, password);
+        user.setAdmin(true);
+        addUser(user);
     }
 
+    @Override
+    public void addLoan (Loan loan) throws ServiceException{
+        checkLoggedIn();
+        try {
+            DAOFactory.getInstance().getUserDAO().manageLoans(currentUser, loan, true);
+        } catch (DAOException e) {
+            throw new ServiceException("Error in adding loan ", e);
+        }
+    }
+
+    @Override
+    public void removeLoan (Loan loan) throws ServiceException{
+        checkLoggedIn();
+        try {
+            DAOFactory.getInstance().getUserDAO().manageLoans(currentUser, loan, false);
+        } catch (DAOException e) {
+            throw new ServiceException("Error in removing loan ", e);
+        }
+    }
 
     @Override
     public String getAllLoans () throws ServiceException{
-        return getLoanTable(users);
+        try {
+            return getLoanTable(DAOFactory.getInstance().getUserDAO().loadAllUsers());
+        } catch (DAOException e) {
+            throw new ServiceException("Error in getting loans", e);
+        }
     }
 
     @Override
@@ -122,7 +168,7 @@ public class ClientServiceImpl implements ClientService {
         Checker.validateStringField(login, "Login");
         ArrayList<User> userLoans;
         for (User user :
-                users) {
+                loadUsersFromDb()) {
             if (user.getLogin().equals(login)) {
                 userLoans = new ArrayList<>();
                 userLoans.add(user);
@@ -137,15 +183,33 @@ public class ClientServiceImpl implements ClientService {
         return getAllUserLoans(currentUser.getLogin());
     }
 
+    private ArrayList<User> loadUsersFromDb () throws ServiceException{
+        ArrayList<User> userArrayList = null;
+        try {
+            userArrayList = DAOFactory.getInstance().getUserDAO().loadAllUsers();
+        } catch (DAOException e) {
+            throw new ServiceException("Error in loading users", e);
+        }
+        return userArrayList;
+    }
+
+    private void saveUsersToDB(ArrayList<User> userArrayList) throws ServiceException{
+        try {
+            DAOFactory.getInstance().getUserDAO().saveAllUsers(userArrayList);
+        } catch (DAOException e) {
+            throw new ServiceException("Error is saving users", e);
+        }
+    }
+
     @Override
     public String getAllUsers () throws ServiceException{
-        loadUsers();
-        if (users.isEmpty())
+        ArrayList<User> userArrayList = loadUsersFromDb();
+        if (userArrayList.isEmpty())
             return "No users";
         int nameMax = 6;
         int loginMax = 9;
         for (User user :
-                users) {
+                userArrayList) {
             if (user.getName().length() > nameMax)
                 nameMax = user.getName().length();
             if (user.getLogin().length() > loginMax)
@@ -160,7 +224,7 @@ public class ClientServiceImpl implements ClientService {
         res.append(String.format(leftAlignFormat, "Name", "Username"));
         res.append(delimiter);
         for (User user :
-                users) {
+                userArrayList) {
             res.append(String.format(leftAlignFormat, user.getName(), user.getLogin()));
             res.append(delimiter);
         }
@@ -234,24 +298,6 @@ public class ClientServiceImpl implements ClientService {
             delimiter.append(ch);
         }
         return String.valueOf(delimiter);
-    }
-
-    @Override
-    public void saveUsers () throws ServiceException{
-        try {
-            DAOFactory.getInstance().getUserDAO().serialize(users);
-        } catch (DAOException e) {
-            throw new ServiceException("Error", e);
-        }
-    }
-
-    @Override
-    public void loadUsers () throws ServiceException{
-        try {
-            users = DAOFactory.getInstance().getUserDAO().deserialize();
-        } catch (DAOException e) {
-            throw new ServiceException("Library is unavailable", e);
-        }
     }
 
 }
